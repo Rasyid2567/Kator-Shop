@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kator Shop</title>
+  <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #sidebarOverlay {
+      display: none;
+    }
+
+    @media (max-width: 767px) {
+      #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100dvh;
+        z-index: 40;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        width: 14rem;
+      }
+
+      #sidebar.open {
+        transform: translateX(0);
+      }
+
+      #sidebarOverlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <header
+    class="md:hidden sticky top-0 z-30 flex items-center justify-between bg-white border-b-2 border-blue-900 px-4 py-2.5">
+    <button id="hamburgerBtn" class="text-blue-900 focus:outline-none" aria-label="Menu">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+    <span class="font-bold text-blue-900 text-sm flex items-center gap-2">
+      <img src="logo.png" alt="Logo" class="w-6 h-6 object-contain" />
+      <span>Kator Shop</span>
+    </span>
+    <div class="w-6"></div>
+  </header>
+
+  <sidebar-overlay id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30"></sidebar-overlay>
+
+  <main class="flex min-h-screen">
+    <nav id="sidebar" class="w-56 bg-gray-100 border-r-2 border-blue-900 p-4 shrink-0">
+      <div
+        class="font-bold text-blue-900 mb-4 text-base flex md:hidden items-center justify-center border-b border-blue-200 pb-2.5">
+        <span>Menu</span>
+      </div>
+
+      <div class="font-bold text-blue-900 mb-4 text-sm hidden md:flex items-center justify-center gap-2">
+        <img src="logo.png" alt="Logo" class="w-6 h-6 object-contain" />
+        <span>Kator Shop</span>
+      </div>
+
+      <nav-admin
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="dashboard">DASHBOARD</nav-admin>
+      <nav-admin
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="products">PRODUCTS</nav-admin>
+      <nav-admin
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="kategori">KATEGORI</nav-admin>
+      <nav-admin
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="transaksi">TRANSAKSI</nav-admin>
+      <nav-admin
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="laporan">LAPORAN</nav-admin>
+
+      <nav-customer
+        class="nav-item customer-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="belanja">
+        BELANJA
+      </nav-customer>
+      <nav-customer
+        class="nav-item customer-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="keranjang">
+        KERANJANG
+      </nav-customer>
+      <nav-customer
+        class="nav-item customer-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        data-section="riwayat">
+        RIWAYAT TRANSAKSI
+      </nav-customer>
+      <nav-customer id="logoutBtn"
+        class="block text-center bg-white border border-red-700 text-red-700 py-2.5 px-2 mt-7 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-red-50">
+        LOGOUT
+      </nav-customer>
+    </nav>
+
+    <div class="flex-1 p-4 md:p-6 min-w-0">
+      <div class="flex justify-between items-center mb-2.5">
+        <div class="text-xs text-gray-600">
+          Selamat Datang <b id="currentUser"></b>
+          <span id="currentRole"
+            class="admin-only inline-block text-[11px] py-0.5 px-2 rounded-full bg-blue-900 text-white ml-1.5 uppercase"></span>
+        </div>
+      </div>
+
+      <section class="admin-only" id="section-dashboard">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Dashboard</h1>
+        <dashboard class="grid grid-cols-2 md:flex gap-3 md:gap-4 flex-wrap mb-5">
+          <dashboard-card
+            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
+            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardProduk"></div>
+            <div class="text-[11px] md:text-xs text-gray-500">Total Produk</div>
+          </dashboard-card>
+          <dashboard-card
+            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
+            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardKategori">0</div>
+            <div class="text-[11px] md:text-xs text-gray-500">Total Kategori</div>
+          </dashboard-card>
+          <dashboard-card
+            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
+            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardTransaksi">0</div>
+            <div class="text-[11px] md:text-xs text-gray-500">Total Transaksi</div>
+          </dashboard-card>
+          <dashboard-card
+            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
+            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardOmset">Rp 0</div>
+            <div class="text-[11px] md:text-xs text-gray-500">Total Omset</div>
+          </dashboard-card>
+        </dashboard>
+      </section>
+
+      <section class="admin-only hidden" id="section-products">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Products</h1>
+        <div class="flex justify-between items-center mb-3">
+          <button id="toggleAddProduct"
+            class="bg-blue-900 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-blue-950">
+            + Tambah Produk
+          </button>
+        </div>
+
+        <div class="hidden bg-white border border-blue-100 rounded-md p-4 md:p-4.5 mb-5 max-w-full md:max-w-[480px]"
+          id="addProductBox">
+          <form id="productForm">
+            <input type="hidden" id="pEditId" value="" />
+            <div class="mb-3">
+              <label class="block text-xs text-gray-700 mb-1">Nama Produk</label>
+              <input type="text" id="pNama" required
+                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
+            </div>
+            <div class="mb-3">
+              <label class="block text-xs text-gray-700 mb-1">Kategori</label>
+              <select id="pKategori" required
+                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]"></select>
+            </div>
+            <div class="mb-3">
+              <label class="block text-xs text-gray-700 mb-1">Harga (Rp)</label>
+              <input type="number" id="pHarga" min="0" required
+                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
+            </div>
+            <div class="mb-3">
+              <label class="block text-xs text-gray-700 mb-1">Stok</label>
+              <input type="number" id="pStok" min="0" required
+                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
+            </div>
+            <div class="mb-3">
+              <label class="block text-xs text-gray-700 mb-1">Image Address (copy image address dari internet)</label>
+              <input type="text" id="pGambar" placeholder="https://..." required
+                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
+              <div class="mt-2">
+                <img id="pPreview" alt="preview"
+                  class="hidden max-w-[90px] max-h-[90px] border border-gray-300 rounded" />
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" id="productSubmitBtn"
+                class="bg-blue-900 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-blue-950">
+                Simpan Produk
+              </button>
+              <button type="button" id="cancelAddProduct"
+                class="bg-gray-500 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-gray-600">
+                Batal
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="productCards" class="space-y-3"></div>
+      </section>
+
+      <section class="admin-only hidden" id="section-kategori">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Kategori</h1>
+        <div class="bg-white border border-blue-100 rounded-md p-4 md:p-4.5 mb-5 max-w-full md:max-w-[480px]">
+          <form id="kategoriForm">
+            <div class="mb-3">
+              <label class="block text-xs text-gray-700 mb-1">Nama Kategori</label>
+              <input type="text" id="kNama" required
+                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
+            </div>
+            <button type="submit"
+              class="bg-blue-900 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-blue-950">
+              Tambah Kategori
+            </button>
+          </form>
+        </div>
+        <div id="kategoriCards" class="space-y-2 max-w-full md:max-w-[600px]"></div>
+      </section>
+
+      <section class="admin-only hidden" id="section-transaksi">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Transaksi (Semua
+          Pelanggan)</h1>
+        <div id="transaksiCards" class="space-y-3"></div>
+      </section>
+
+      <section class="admin-only hidden" id="section-laporan">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Laporan</h1>
+        <div class="grid grid-cols-2 md:flex gap-3 md:gap-4 flex-wrap mb-5">
+          <div
+            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
+            <div class="text-xl md:text-2xl font-bold text-blue-900" id="lapTotalTransaksi">0</div>
+            <div class="text-[11px] md:text-xs text-gray-500">Jumlah Transaksi</div>
+          </div>
+          <div
+            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
+            <div class="text-xl md:text-2xl font-bold text-blue-900" id="lapTotalOmset">Rp 0</div>
+            <div class="text-[11px] md:text-xs text-gray-500">Total Omset</div>
+          </div>
+        </div>
+        <div id="laporanCards" class="space-y-2"></div>
+      </section>
+      <section class="customer-only" id="section-belanja">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Belanja Produk
+        </h1>
+        <div
+          class="grid gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 lg:[grid-template-columns:repeat(auto-fill,minmax(190px,1fr))]"
+          id="productGrid"></div>
+      </section>
+
+      <section class="customer-only hidden" id="section-keranjang">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Keranjang Saya
+        </h1>
+        <div class="bg-white border border-blue-100 rounded-md overflow-hidden p-3 md:p-4">
+          <div id="cartCards" class="space-y-3 mb-4"></div>
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-blue-100 pt-3.5">
+            <div class="text-[15px]">Total: <b id="cartTotal">Rp 0</b></div>
+            <button id="checkoutBtn"
+              class="w-full sm:w-auto bg-blue-900 text-white border-none py-2 px-5 rounded text-[13px] cursor-pointer hover:bg-blue-950">
+              Checkout
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="customer-only hidden" id="section-riwayat">
+        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Riwayat
+          Transaksi Saya</h1>
+        <div id="riwayatCards" class="space-y-3"></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="popupOverlay"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] hidden items-center justify-center transition-opacity duration-200 opacity-0"
+    style="display:none;">
+    <div id="popupBox"
+      class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-[90%] transform scale-90 translate-y-3 opacity-0 transition-all duration-200 ease-out">
+      <div class="flex items-center gap-3 mb-3">
+        <div id="popupIcon"
+          class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0"></div>
+        <h3 id="popupTitle" class="text-base font-semibold text-gray-800"></h3>
+      </div>
+      <p id="popupMessage" class="text-sm text-gray-600 mb-5 leading-relaxed"></p>
+      <div id="popupActions" class="flex gap-2 justify-end"></div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/popup.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const hamburger = document.getElementById('hamburgerBtn');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      if (hamburger) {
+        hamburger.addEventListener('click', () => {
+          sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+        });
+      }
+      const closeBtn = document.getElementById('closeSidebarBtn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', closeSidebar);
+      }
+      if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+      }
+
+      document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+        item.addEventListener('click', () => {
+          if (window.innerWidth < 768) closeSidebar();
+        });
+      });
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          if (window.innerWidth < 768) closeSidebar();
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

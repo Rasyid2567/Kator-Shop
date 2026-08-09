@@ -1,0 +1,12 @@
+{
+  "name": "toko-app",
+  "version": "1.0.0",
+  "description": "Toko App dengan Node.js Backend untuk simpan otomatis ke file JSON",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+} 
