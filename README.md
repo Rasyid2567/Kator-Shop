@@ -52,8 +52,8 @@ Pastikan Anda telah menginstal **[Node.js](https://nodejs.org/)** di komputer An
 
 ### 2. Clone Repository
 ```bash
-git clone https://github.com/USERNAME-ANDA/toko.git
-cd toko
+git clone https://github.com/Rasyid2567/Kator-Shop.git
+cd Kator-Shop
 ```
 
 ### 3. Install Dependency
