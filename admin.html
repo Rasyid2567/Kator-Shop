@@ -65,26 +65,26 @@
       </div>
 
       <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
         data-section="dashboard">DASHBOARD</nav-admin>
       <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
         data-section="products">PRODUCTS</nav-admin>
       <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
         data-section="kategori">KATEGORI</nav-admin>
       <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
         data-section="transaksi">TRANSAKSI</nav-admin>
       <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
         data-section="laporan">LAPORAN</nav-admin>
       <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
+        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
         data-section="accounts">ACCOUNTS</nav-admin>
 
       <div id="logoutBtn"
-        class="block text-center bg-white border border-red-700 text-red-700 py-2.5 px-2 mt-7 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-red-50">
+        class="block text-center bg-white border border-red-700 text-red-700 py-2.5 px-2 mt-7 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-red-50">
         LOGOUT
       </div>
     </nav>
@@ -158,12 +158,33 @@
                 class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
             </div>
             <div class="mb-3">
-              <label class="block text-xs text-gray-700 mb-1">Image Address (copy image address dari internet)</label>
-              <input type="text" id="pGambar" placeholder="https://..." required
-                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
+              <label class="block text-xs text-gray-700 mb-1 font-medium">Gambar Produk</label>
+
+              <div class="flex items-center gap-4 mb-2 text-xs">
+                <label class="inline-flex items-center cursor-pointer text-gray-700">
+                  <input type="radio" name="pImgSource" value="link" id="pImgSourceLink" checked class="mr-1.5 accent-blue-900 cursor-pointer" />
+                  <span>Link URL</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer text-gray-700">
+                  <input type="radio" name="pImgSource" value="upload" id="pImgSourceUpload" class="mr-1.5 accent-blue-900 cursor-pointer" />
+                  <span>Upload File</span>
+                </label>
+              </div>
+
+              <div id="pImgLinkContainer">
+                <input type="text" id="pGambar" placeholder="https://..."
+                  class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
+              </div>
+
+              <div id="pImgUploadContainer" class="hidden">
+                <input type="file" id="pGambarFile" accept="image/*"
+                  class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-blue-50 file:text-blue-900 hover:file:bg-blue-100 cursor-pointer" />
+                <p class="text-[11px] text-gray-400 mt-1">Pilih file gambar dari perangkat Anda (Maks. 5MB)</p>
+              </div>
+
               <div class="mt-2">
                 <img id="pPreview" alt="preview"
-                  class="hidden max-w-[90px] max-h-[90px] border border-gray-300 rounded" />
+                  class="hidden max-w-[100px] max-h-[100px] object-cover border border-gray-300 rounded shadow-sm" />
               </div>
             </div>
             <div class="flex gap-2">

@@ -117,17 +117,67 @@ if (isAdmin) {
     });
   }
 
+  // --- Switch & Handle Image Input (Link vs Upload) ---
+  const pImgSourceLink = document.getElementById("pImgSourceLink");
+  const pImgSourceUpload = document.getElementById("pImgSourceUpload");
+  const pImgLinkContainer = document.getElementById("pImgLinkContainer");
+  const pImgUploadContainer = document.getElementById("pImgUploadContainer");
   const pGambarEl = document.getElementById("pGambar");
+  const pGambarFileEl = document.getElementById("pGambarFile");
+  const previewEl = document.getElementById("pPreview");
+
+  function switchImageInputMode(mode) {
+    if (mode === "upload") {
+      if (pImgSourceUpload) pImgSourceUpload.checked = true;
+      if (pImgLinkContainer) pImgLinkContainer.classList.add("hidden");
+      if (pImgUploadContainer) pImgUploadContainer.classList.remove("hidden");
+    } else {
+      if (pImgSourceLink) pImgSourceLink.checked = true;
+      if (pImgLinkContainer) pImgLinkContainer.classList.remove("hidden");
+      if (pImgUploadContainer) pImgUploadContainer.classList.add("hidden");
+    }
+  }
+
+  if (pImgSourceLink) {
+    pImgSourceLink.addEventListener("change", () => switchImageInputMode("link"));
+  }
+  if (pImgSourceUpload) {
+    pImgSourceUpload.addEventListener("change", () => switchImageInputMode("upload"));
+  }
+
   if (pGambarEl) {
     pGambarEl.addEventListener("input", (e) => {
-      const preview = document.getElementById("pPreview");
-      if (!preview) return;
       const url = e.target.value.trim();
       if (url) {
-        preview.src = url;
-        preview.classList.remove("hidden");
+        if (previewEl) {
+          previewEl.src = url;
+          previewEl.classList.remove("hidden");
+        }
       } else {
-        preview.classList.add("hidden");
+        if (previewEl) previewEl.classList.add("hidden");
+      }
+    });
+  }
+
+  if (pGambarFileEl) {
+    pGambarFileEl.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          popupAlert("Ukuran file gambar terlalu besar (maksimal 5MB).", "warning", "Ukuran Melebihi Batas");
+          pGambarFileEl.value = "";
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const base64Str = evt.target.result;
+          if (pGambarEl) pGambarEl.value = base64Str;
+          if (previewEl) {
+            previewEl.src = base64Str;
+            previewEl.classList.remove("hidden");
+          }
+        };
+        reader.readAsDataURL(file);
       }
     });
   }
@@ -137,13 +187,19 @@ if (isAdmin) {
     productFormEl.addEventListener("submit", (e) => {
       e.preventDefault();
       const editId = document.getElementById("pEditId") ? document.getElementById("pEditId").value : "";
+      const gambarVal = pGambarEl ? pGambarEl.value.trim() : "";
+
+      if (!gambarVal) {
+        popupAlert("Harap masukkan link gambar atau upload file gambar!", "warning", "Gambar Diperlukan");
+        return;
+      }
 
       const data = {
         nama: document.getElementById("pNama").value.trim(),
         kategori: document.getElementById("pKategori").value,
         harga: Number(document.getElementById("pHarga").value),
         stok: Number(document.getElementById("pStok").value),
-        gambar: document.getElementById("pGambar").value.trim(),
+        gambar: gambarVal,
       };
 
       if (editId) {
@@ -170,8 +226,13 @@ if (isAdmin) {
     if (form) form.reset();
     const pEditId = document.getElementById("pEditId");
     if (pEditId) pEditId.value = "";
-    const preview = document.getElementById("pPreview");
-    if (preview) preview.classList.add("hidden");
+    if (pGambarEl) pGambarEl.value = "";
+    if (pGambarFileEl) pGambarFileEl.value = "";
+    switchImageInputMode("link");
+    if (previewEl) {
+      previewEl.src = "";
+      previewEl.classList.add("hidden");
+    }
     const submitBtn = document.getElementById("productSubmitBtn");
     if (submitBtn) submitBtn.textContent = "Simpan Produk";
   }
@@ -184,12 +245,24 @@ if (isAdmin) {
     if (document.getElementById("pKategori")) document.getElementById("pKategori").value = p.kategori;
     if (document.getElementById("pHarga")) document.getElementById("pHarga").value = p.harga;
     if (document.getElementById("pStok")) document.getElementById("pStok").value = p.stok;
-    if (document.getElementById("pGambar")) document.getElementById("pGambar").value = p.gambar;
-    const preview = document.getElementById("pPreview");
-    if (preview) {
-      preview.src = p.gambar;
-      preview.classList.remove("hidden");
+    if (pGambarEl) pGambarEl.value = p.gambar || "";
+    if (pGambarFileEl) pGambarFileEl.value = "";
+
+    if (p.gambar && p.gambar.startsWith("data:image/")) {
+      switchImageInputMode("upload");
+    } else {
+      switchImageInputMode("link");
     }
+
+    if (previewEl) {
+      if (p.gambar) {
+        previewEl.src = p.gambar;
+        previewEl.classList.remove("hidden");
+      } else {
+        previewEl.classList.add("hidden");
+      }
+    }
+
     const submitBtn = document.getElementById("productSubmitBtn");
     if (submitBtn) submitBtn.textContent = "Update Produk";
     const addBox = document.getElementById("addProductBox");
