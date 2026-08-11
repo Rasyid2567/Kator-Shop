@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kator Shop</title>
+  <title>Kastor Shop</title>
   <link rel="shortcut icon" href="logo.png" type="image/x-icon">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="http://cdn.tailwindcss.com"></script>
   <style>
     #sidebarOverlay {
       display: none;
@@ -45,7 +45,7 @@
     </button>
     <span class="font-bold text-blue-900 text-sm flex items-center gap-2">
       <img src="logo.png" alt="Logo" class="w-6 h-6 object-contain" />
-      <span>Kator Shop</span>
+      <span>Kastor Shop</span>
     </span>
     <div class="w-6"></div>
   </header>
@@ -61,24 +61,8 @@
 
       <div class="font-bold text-blue-900 mb-4 text-sm hidden md:flex items-center justify-center gap-2">
         <img src="logo.png" alt="Logo" class="w-6 h-6 object-contain" />
-        <span>Kator Shop</span>
+        <span>Kastor Shop</span>
       </div>
-
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="dashboard">DASHBOARD</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="products">PRODUCTS</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="kategori">KATEGORI</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="transaksi">TRANSAKSI</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="laporan">LAPORAN</nav-admin>
 
       <nav-customer
         class="nav-item customer-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
@@ -105,135 +89,9 @@
       <div class="flex justify-between items-center mb-2.5">
         <div class="text-xs text-gray-600">
           Selamat Datang <b id="currentUser"></b>
-          <span id="currentRole"
-            class="admin-only inline-block text-[11px] py-0.5 px-2 rounded-full bg-blue-900 text-white ml-1.5 uppercase"></span>
         </div>
       </div>
 
-      <section class="admin-only" id="section-dashboard">
-        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Dashboard</h1>
-        <dashboard class="grid grid-cols-2 md:flex gap-3 md:gap-4 flex-wrap mb-5">
-          <dashboard-card
-            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
-            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardProduk"></div>
-            <div class="text-[11px] md:text-xs text-gray-500">Total Produk</div>
-          </dashboard-card>
-          <dashboard-card
-            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
-            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardKategori">0</div>
-            <div class="text-[11px] md:text-xs text-gray-500">Total Kategori</div>
-          </dashboard-card>
-          <dashboard-card
-            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
-            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardTransaksi">0</div>
-            <div class="text-[11px] md:text-xs text-gray-500">Total Transaksi</div>
-          </dashboard-card>
-          <dashboard-card
-            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
-            <div class="text-xl md:text-2xl font-bold text-blue-900" id="cardOmset">Rp 0</div>
-            <div class="text-[11px] md:text-xs text-gray-500">Total Omset</div>
-          </dashboard-card>
-        </dashboard>
-      </section>
-
-      <section class="admin-only hidden" id="section-products">
-        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Products</h1>
-        <div class="flex justify-between items-center mb-3">
-          <button id="toggleAddProduct"
-            class="bg-blue-900 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-blue-950">
-            + Tambah Produk
-          </button>
-        </div>
-
-        <div class="hidden bg-white border border-blue-100 rounded-md p-4 md:p-4.5 mb-5 max-w-full md:max-w-[480px]"
-          id="addProductBox">
-          <form id="productForm">
-            <input type="hidden" id="pEditId" value="" />
-            <div class="mb-3">
-              <label class="block text-xs text-gray-700 mb-1">Nama Produk</label>
-              <input type="text" id="pNama" required
-                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
-            </div>
-            <div class="mb-3">
-              <label class="block text-xs text-gray-700 mb-1">Kategori</label>
-              <select id="pKategori" required
-                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]"></select>
-            </div>
-            <div class="mb-3">
-              <label class="block text-xs text-gray-700 mb-1">Harga (Rp)</label>
-              <input type="number" id="pHarga" min="0" required
-                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
-            </div>
-            <div class="mb-3">
-              <label class="block text-xs text-gray-700 mb-1">Stok</label>
-              <input type="number" id="pStok" min="0" required
-                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
-            </div>
-            <div class="mb-3">
-              <label class="block text-xs text-gray-700 mb-1">Image Address (copy image address dari internet)</label>
-              <input type="text" id="pGambar" placeholder="https://..." required
-                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
-              <div class="mt-2">
-                <img id="pPreview" alt="preview"
-                  class="hidden max-w-[90px] max-h-[90px] border border-gray-300 rounded" />
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <button type="submit" id="productSubmitBtn"
-                class="bg-blue-900 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-blue-950">
-                Simpan Produk
-              </button>
-              <button type="button" id="cancelAddProduct"
-                class="bg-gray-500 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-gray-600">
-                Batal
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div id="productCards" class="space-y-3"></div>
-      </section>
-
-      <section class="admin-only hidden" id="section-kategori">
-        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Kategori</h1>
-        <div class="bg-white border border-blue-100 rounded-md p-4 md:p-4.5 mb-5 max-w-full md:max-w-[480px]">
-          <form id="kategoriForm">
-            <div class="mb-3">
-              <label class="block text-xs text-gray-700 mb-1">Nama Kategori</label>
-              <input type="text" id="kNama" required
-                class="w-full py-1.5 px-2.5 border border-slate-300 rounded text-[13px]" />
-            </div>
-            <button type="submit"
-              class="bg-blue-900 text-white border-none py-2 px-3.5 rounded text-[13px] cursor-pointer hover:bg-blue-950">
-              Tambah Kategori
-            </button>
-          </form>
-        </div>
-        <div id="kategoriCards" class="space-y-2 max-w-full md:max-w-[600px]"></div>
-      </section>
-
-      <section class="admin-only hidden" id="section-transaksi">
-        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Transaksi (Semua
-          Pelanggan)</h1>
-        <div id="transaksiCards" class="space-y-3"></div>
-      </section>
-
-      <section class="admin-only hidden" id="section-laporan">
-        <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Laporan</h1>
-        <div class="grid grid-cols-2 md:flex gap-3 md:gap-4 flex-wrap mb-5">
-          <div
-            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
-            <div class="text-xl md:text-2xl font-bold text-blue-900" id="lapTotalTransaksi">0</div>
-            <div class="text-[11px] md:text-xs text-gray-500">Jumlah Transaksi</div>
-          </div>
-          <div
-            class="bg-white border border-blue-100 border-l-4 border-l-blue-900 rounded-md py-3 px-3 md:py-3.5 md:px-4.5 min-w-0 md:min-w-[160px]">
-            <div class="text-xl md:text-2xl font-bold text-blue-900" id="lapTotalOmset">Rp 0</div>
-            <div class="text-[11px] md:text-xs text-gray-500">Total Omset</div>
-          </div>
-        </div>
-        <div id="laporanCards" class="space-y-2"></div>
-      </section>
       <section class="customer-only" id="section-belanja">
         <h1 class="text-lg md:text-xl text-blue-900 font-semibold mb-4 border-b-2 border-blue-900 pb-2">Belanja Produk
         </h1>

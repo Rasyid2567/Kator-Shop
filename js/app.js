@@ -1,12 +1,14 @@
 const PRODUCTS_JSON_PATH = "data/products.json";
 const KATEGORI_JSON_PATH = "data/kategori.json";
 const TRANSAKSI_JSON_PATH = "data/transaksi.json";
+const ACCOUNTS_JSON_PATH = "data/accounts.json";
 
 const NAV_ACTIVE_CLASSES = ["bg-blue-200", "font-bold", "ring-2", "ring-blue-900", "ring-inset"];
 
 let products = [];
 let kategoriList = [];
 let transaksiList = [];
+let accountsList = [];
 let cart = [];
 let session = null;
 
@@ -20,49 +22,55 @@ if (!session) {
 }
 
 const isAdmin = session && session.role === "admin";
+const isPathAdmin = window.location.pathname.startsWith("/admin") || window.location.pathname.includes("admin.html");
 
-document.getElementById("currentUser").textContent = session ? session.username : "";
-document.getElementById("currentRole").textContent = session ? session.role : "";
+// Dynamic Route Guard
+if (isPathAdmin && !isAdmin) {
+  window.location.href = "/";
+} else if (!isPathAdmin && isAdmin) {
+  window.location.href = "/admin";
+}
 
-document.querySelectorAll(".nav-item.admin-only").forEach((el) => {
-  el.classList.toggle("hidden", !isAdmin);
-});
-document.querySelectorAll(".nav-item.customer-only").forEach((el) => {
-  el.classList.toggle("hidden", isAdmin);
-});
+const currentUserEl = document.getElementById("currentUser");
+if (currentUserEl) currentUserEl.textContent = session ? session.username : "";
 
-document.querySelectorAll("section.admin-only, section.customer-only").forEach((s) => {
+const currentRoleEl = document.getElementById("currentRole");
+if (currentRoleEl) currentRoleEl.textContent = session ? session.role : "";
+
+document.querySelectorAll("section[id^='section-']").forEach((s) => {
   s.classList.add("hidden");
 });
-const defaultNav = document.querySelector(
-  ".nav-item" + (isAdmin ? ".admin-only" : ".customer-only")
-);
+
+const defaultNav = document.querySelector(".nav-item");
 if (defaultNav) {
   defaultNav.classList.add(...NAV_ACTIVE_CLASSES);
   const targetSec = document.getElementById("section-" + defaultNav.dataset.section);
   if (targetSec) targetSec.classList.remove("hidden");
 }
 
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  clearSession();
-  window.location.href = "/login";
-});
+const logoutBtnEl = document.getElementById("logoutBtn");
+if (logoutBtnEl) {
+  logoutBtnEl.addEventListener("click", () => {
+    clearSession();
+    window.location.href = "/login";
+  });
+}
 
 document.querySelectorAll(".nav-item[data-section]").forEach((item) => {
   item.addEventListener("click", () => {
-    const scope = isAdmin ? ".admin-only" : ".customer-only";
-
-    document.querySelectorAll(".nav-item" + scope).forEach((i) => i.classList.remove(...NAV_ACTIVE_CLASSES));
+    document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove(...NAV_ACTIVE_CLASSES));
     item.classList.add(...NAV_ACTIVE_CLASSES);
 
-    document.querySelectorAll("section" + scope).forEach((s) => s.classList.add("hidden"));
-    document.getElementById("section-" + item.dataset.section).classList.remove("hidden");
+    document.querySelectorAll("section[id^='section-']").forEach((s) => s.classList.add("hidden"));
+    const sec = document.getElementById("section-" + item.dataset.section);
+    if (sec) sec.classList.remove("hidden");
 
-    if (item.dataset.section === "dashboard") renderDashboard();
-    if (item.dataset.section === "laporan") renderLaporan();
-    if (item.dataset.section === "belanja") renderProductGrid();
-    if (item.dataset.section === "keranjang") renderCart();
-    if (item.dataset.section === "riwayat") renderRiwayat();
+    if (item.dataset.section === "dashboard" && typeof renderDashboard === "function") renderDashboard();
+    if (item.dataset.section === "laporan" && typeof renderLaporan === "function") renderLaporan();
+    if (item.dataset.section === "accounts" && typeof renderAccounts === "function") renderAccounts();
+    if (item.dataset.section === "belanja" && typeof renderProductGrid === "function") renderProductGrid();
+    if (item.dataset.section === "keranjang" && typeof renderCart === "function") renderCart();
+    if (item.dataset.section === "riwayat" && typeof renderRiwayat === "function") renderRiwayat();
   });
 });
 
@@ -70,6 +78,7 @@ async function init() {
   products = await loadStore(STORE.PRODUCTS, PRODUCTS_JSON_PATH);
   kategoriList = await loadStore(STORE.KATEGORI, KATEGORI_JSON_PATH);
   transaksiList = await loadStore(STORE.TRANSAKSI, TRANSAKSI_JSON_PATH);
+  accountsList = await loadStore(STORE.ACCOUNTS, ACCOUNTS_JSON_PATH);
   cart = JSON.parse(localStorage.getItem(STORE.CART) || "[]");
 
   if (isAdmin) {
@@ -79,6 +88,7 @@ async function init() {
     renderKategoriTable();
     renderTransaksiAdmin();
     renderLaporan();
+    renderAccounts();
   } else {
     renderProductGrid();
     renderCart();
@@ -89,77 +99,101 @@ async function init() {
 init();
 
 if (isAdmin) {
-  document.getElementById("toggleAddProduct").addEventListener("click", () => {
-    resetProductForm();
-    document.getElementById("addProductBox").classList.toggle("hidden");
-  });
+  const toggleAddBtn = document.getElementById("toggleAddProduct");
+  if (toggleAddBtn) {
+    toggleAddBtn.addEventListener("click", () => {
+      resetProductForm();
+      const box = document.getElementById("addProductBox");
+      if (box) box.classList.toggle("hidden");
+    });
+  }
 
-  document.getElementById("cancelAddProduct").addEventListener("click", () => {
-    document.getElementById("addProductBox").classList.add("hidden");
-    resetProductForm();
-  });
+  const cancelAddBtn = document.getElementById("cancelAddProduct");
+  if (cancelAddBtn) {
+    cancelAddBtn.addEventListener("click", () => {
+      const box = document.getElementById("addProductBox");
+      if (box) box.classList.add("hidden");
+      resetProductForm();
+    });
+  }
 
-  document.getElementById("pGambar").addEventListener("input", (e) => {
-    const preview = document.getElementById("pPreview");
-    const url = e.target.value.trim();
-    if (url) {
-      preview.src = url;
-      preview.classList.remove("hidden");
-    } else {
-      preview.classList.add("hidden");
-    }
-  });
+  const pGambarEl = document.getElementById("pGambar");
+  if (pGambarEl) {
+    pGambarEl.addEventListener("input", (e) => {
+      const preview = document.getElementById("pPreview");
+      if (!preview) return;
+      const url = e.target.value.trim();
+      if (url) {
+        preview.src = url;
+        preview.classList.remove("hidden");
+      } else {
+        preview.classList.add("hidden");
+      }
+    });
+  }
 
-  document.getElementById("productForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const editId = document.getElementById("pEditId").value;
+  const productFormEl = document.getElementById("productForm");
+  if (productFormEl) {
+    productFormEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const editId = document.getElementById("pEditId") ? document.getElementById("pEditId").value : "";
 
-    const data = {
-      nama: document.getElementById("pNama").value.trim(),
-      kategori: document.getElementById("pKategori").value,
-      harga: Number(document.getElementById("pHarga").value),
-      stok: Number(document.getElementById("pStok").value),
-      gambar: document.getElementById("pGambar").value.trim(),
-    };
+      const data = {
+        nama: document.getElementById("pNama").value.trim(),
+        kategori: document.getElementById("pKategori").value,
+        harga: Number(document.getElementById("pHarga").value),
+        stok: Number(document.getElementById("pStok").value),
+        gambar: document.getElementById("pGambar").value.trim(),
+      };
 
-    if (editId) {
-      const idx = products.findIndex((p) => p.id === editId);
-      if (idx !== -1) products[idx] = { ...products[idx], ...data };
-      popupAlert(`Produk "${data.nama}" berhasil diperbarui!`, "success", "Berhasil");
-    } else {
-      products.push({ id: genId("p"), ...data });
-      popupAlert(`Produk "${data.nama}" berhasil ditambahkan!`, "success", "Berhasil");
-    }
+      if (editId) {
+        const idx = products.findIndex((p) => p.id === editId);
+        if (idx !== -1) products[idx] = { ...products[idx], ...data };
+        popupAlert(`Produk "${data.nama}" berhasil diperbarui!`, "success", "Berhasil");
+      } else {
+        products.push({ id: genId("p"), ...data });
+        popupAlert(`Produk "${data.nama}" berhasil ditambahkan!`, "success", "Berhasil");
+      }
 
-    saveStore(STORE.PRODUCTS, products);
+      saveStore(STORE.PRODUCTS, products);
 
-    document.getElementById("addProductBox").classList.add("hidden");
-    resetProductForm();
-    renderProducts();
-    renderDashboard();
-  });
+      const addBox = document.getElementById("addProductBox");
+      if (addBox) addBox.classList.add("hidden");
+      resetProductForm();
+      renderProducts();
+      renderDashboard();
+    });
+  }
 
   function resetProductForm() {
-    document.getElementById("productForm").reset();
-    document.getElementById("pEditId").value = "";
-    document.getElementById("pPreview").classList.add("hidden");
-    document.getElementById("productSubmitBtn").textContent = "Simpan Produk";
+    const form = document.getElementById("productForm");
+    if (form) form.reset();
+    const pEditId = document.getElementById("pEditId");
+    if (pEditId) pEditId.value = "";
+    const preview = document.getElementById("pPreview");
+    if (preview) preview.classList.add("hidden");
+    const submitBtn = document.getElementById("productSubmitBtn");
+    if (submitBtn) submitBtn.textContent = "Simpan Produk";
   }
 
   function editProduct(id) {
     const p = products.find((x) => x.id === id);
     if (!p) return;
-    document.getElementById("pEditId").value = p.id;
-    document.getElementById("pNama").value = p.nama;
-    document.getElementById("pKategori").value = p.kategori;
-    document.getElementById("pHarga").value = p.harga;
-    document.getElementById("pStok").value = p.stok;
-    document.getElementById("pGambar").value = p.gambar;
+    if (document.getElementById("pEditId")) document.getElementById("pEditId").value = p.id;
+    if (document.getElementById("pNama")) document.getElementById("pNama").value = p.nama;
+    if (document.getElementById("pKategori")) document.getElementById("pKategori").value = p.kategori;
+    if (document.getElementById("pHarga")) document.getElementById("pHarga").value = p.harga;
+    if (document.getElementById("pStok")) document.getElementById("pStok").value = p.stok;
+    if (document.getElementById("pGambar")) document.getElementById("pGambar").value = p.gambar;
     const preview = document.getElementById("pPreview");
-    preview.src = p.gambar;
-    preview.classList.remove("hidden");
-    document.getElementById("productSubmitBtn").textContent = "Update Produk";
-    document.getElementById("addProductBox").classList.remove("hidden");
+    if (preview) {
+      preview.src = p.gambar;
+      preview.classList.remove("hidden");
+    }
+    const submitBtn = document.getElementById("productSubmitBtn");
+    if (submitBtn) submitBtn.textContent = "Update Produk";
+    const addBox = document.getElementById("addProductBox");
+    if (addBox) addBox.classList.remove("hidden");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -171,6 +205,93 @@ if (isAdmin) {
     renderProducts();
     renderDashboard();
     popupAlert("Produk berhasil dihapus.", "success", "Berhasil");
+  };
+
+  // ACCOUNTS MANAGEMENT FOR ADMIN
+  const toggleAddAccountBtn = document.getElementById("toggleAddAccount");
+  if (toggleAddAccountBtn) {
+    toggleAddAccountBtn.addEventListener("click", () => {
+      resetAccountForm();
+      const box = document.getElementById("addAccountBox");
+      if (box) box.classList.toggle("hidden");
+    });
+  }
+
+  const cancelAccountBtn = document.getElementById("cancelAccountForm");
+  if (cancelAccountBtn) {
+    cancelAccountBtn.addEventListener("click", () => {
+      const box = document.getElementById("addAccountBox");
+      if (box) box.classList.add("hidden");
+      resetAccountForm();
+    });
+  }
+
+  const accountFormEl = document.getElementById("accountForm");
+  if (accountFormEl) {
+    accountFormEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const editOldUsername = document.getElementById("accEditId") ? document.getElementById("accEditId").value : "";
+      const username = document.getElementById("accUsername").value.trim();
+      const password = document.getElementById("accPassword").value;
+      const role = document.getElementById("accRole").value;
+
+      if (!username || !password) return;
+
+      if (editOldUsername) {
+        const idx = accountsList.findIndex((a) => a.username === editOldUsername);
+        if (idx !== -1) {
+          accountsList[idx] = { username, password, role };
+          popupAlert(`Akun "${username}" berhasil diperbarui!`, "success", "Berhasil");
+        }
+      } else {
+        if (accountsList.some((a) => a.username === username)) {
+          popupAlert(`Username "${username}" sudah digunakan.`, "warning", "Peringatan");
+          return;
+        }
+        accountsList.push({ username, password, role });
+        popupAlert(`Akun "${username}" berhasil ditambahkan!`, "success", "Berhasil");
+      }
+
+      saveStore(STORE.ACCOUNTS, accountsList);
+
+      const addBox = document.getElementById("addAccountBox");
+      if (addBox) addBox.classList.add("hidden");
+      resetAccountForm();
+      renderAccounts();
+    });
+  }
+
+  function resetAccountForm() {
+    const form = document.getElementById("accountForm");
+    if (form) form.reset();
+    const accEditId = document.getElementById("accEditId");
+    if (accEditId) accEditId.value = "";
+  }
+
+  function editAccount(username) {
+    const acc = accountsList.find((a) => a.username === username);
+    if (!acc) return;
+    if (document.getElementById("accEditId")) document.getElementById("accEditId").value = acc.username;
+    if (document.getElementById("accUsername")) document.getElementById("accUsername").value = acc.username;
+    if (document.getElementById("accPassword")) document.getElementById("accPassword").value = acc.password;
+    if (document.getElementById("accRole")) document.getElementById("accRole").value = acc.role || "customer";
+
+    const addBox = document.getElementById("addAccountBox");
+    if (addBox) addBox.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  window.editAccount = editAccount;
+  window.deleteAccount = async function (username) {
+    if (session && username === session.username) {
+      popupAlert("Anda tidak dapat menghapus akun Anda sendiri yang sedang digunakan.", "warning", "Peringatan");
+      return;
+    }
+    if (!(await popupConfirm(`Hapus akun "${username}"?`))) return;
+    accountsList = accountsList.filter((a) => a.username !== username);
+    saveStore(STORE.ACCOUNTS, accountsList);
+    renderAccounts();
+    popupAlert(`Akun "${username}" berhasil dihapus.`, "success", "Berhasil");
   };
 }
 
@@ -203,27 +324,71 @@ function renderProducts() {
   });
 }
 
+function renderAccounts() {
+  const container = document.getElementById("accountsCards");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (accountsList.length === 0) {
+    container.innerHTML = '<div class="text-[13px] text-gray-400 py-3">Belum ada akun.</div>';
+    return;
+  }
+
+  accountsList.forEach((acc) => {
+    const card = document.createElement("div");
+    card.className = "bg-white border border-gray-200 rounded-lg p-3.5 flex justify-between items-center text-xs shadow-sm hover:shadow-md transition-shadow";
+    const roleBadge = acc.role === "admin" 
+      ? `<span class="bg-blue-900 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ml-2">Admin</span>`
+      : `<span class="bg-gray-200 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ml-2">Customer</span>`;
+
+    card.innerHTML = `
+      <div>
+        <div class="font-semibold text-gray-800 text-sm flex items-center">
+          ${acc.username} ${roleBadge}
+        </div>
+        <div class="text-gray-500 text-xs mt-0.5">Password: <span class="font-mono text-gray-700">${acc.password}</span></div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="editAccount('${acc.username}')" class="px-3.5 py-1.5 bg-gray-500 text-white rounded text-xs cursor-pointer hover:bg-gray-600">Edit</button>
+        <button onclick="deleteAccount('${acc.username}')" class="px-3.5 py-1.5 bg-red-700 text-white rounded text-xs cursor-pointer hover:bg-red-800">Hapus</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
 function renderDashboard() {
-  document.getElementById("cardProduk").textContent = products.length;
-  document.getElementById("cardKategori").textContent = kategoriList.length;
-  document.getElementById("cardTransaksi").textContent = transaksiList.length;
+  const cardProduk = document.getElementById("cardProduk");
+  if (cardProduk) cardProduk.textContent = products.length;
+
+  const cardKategori = document.getElementById("cardKategori");
+  if (cardKategori) cardKategori.textContent = kategoriList.length;
+
+  const cardTransaksi = document.getElementById("cardTransaksi");
+  if (cardTransaksi) cardTransaksi.textContent = transaksiList.length;
+
   const Omset = transaksiList.reduce((sum, t) => sum + t.total, 0);
-  document.getElementById("cardOmset").textContent = formatRupiah(Omset);
+  const cardOmset = document.getElementById("cardOmset");
+  if (cardOmset) cardOmset.textContent = formatRupiah(Omset);
 }
 
 if (isAdmin) {
-  document.getElementById("kategoriForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const nama = document.getElementById("kNama").value.trim();
-    if (!nama) return;
-    kategoriList.push({ id: genId("k"), nama });
-    saveStore(STORE.KATEGORI, kategoriList);
-    e.target.reset();
-    renderKategoriTable();
-    renderKategoriSelect();
-    renderDashboard();
-    popupAlert(`Kategori "${nama}" berhasil ditambahkan!`, "success", "Berhasil");
-  });
+  const kategoriFormEl = document.getElementById("kategoriForm");
+  if (kategoriFormEl) {
+    kategoriFormEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const kNama = document.getElementById("kNama");
+      const nama = kNama ? kNama.value.trim() : "";
+      if (!nama) return;
+      kategoriList.push({ id: genId("k"), nama });
+      saveStore(STORE.KATEGORI, kategoriList);
+      e.target.reset();
+      renderKategoriTable();
+      renderKategoriSelect();
+      renderDashboard();
+      popupAlert(`Kategori "${nama}" berhasil ditambahkan!`, "success", "Berhasil");
+    });
+  }
 
   window.editKategori = function (id) {
     const k = kategoriList.find((x) => x.id === id);
@@ -237,7 +402,6 @@ if (isAdmin) {
     k.nama = namaBaru;
     saveStore(STORE.KATEGORI, kategoriList);
 
-    // ikut update kategori di semua produk yang memakai nama lama
     products.forEach((p) => {
       if (p.kategori === lama) p.kategori = namaBaru;
     });
@@ -344,7 +508,8 @@ function renderLaporan() {
   const totalTrx = transaksiList.length;
   const totalOmset = transaksiList.reduce((sum, t) => sum + t.total, 0);
   totalTrxEl.textContent = totalTrx;
-  document.getElementById("lapTotalOmset").textContent = formatRupiah(totalOmset);
+  const OmsetEl = document.getElementById("lapTotalOmset");
+  if (OmsetEl) OmsetEl.textContent = formatRupiah(totalOmset);
 
   const perProduk = {};
   transaksiList.forEach((t) => {
@@ -465,7 +630,8 @@ function renderCart() {
 
   if (cart.length === 0) {
     container.innerHTML = '<div class="text-[13px] text-gray-400 py-6 text-center">Keranjang masih kosong.</div>';
-    document.getElementById("cartTotal").textContent = formatRupiah(0);
+    const cartTotalEl = document.getElementById("cartTotal");
+    if (cartTotalEl) cartTotalEl.textContent = formatRupiah(0);
     return;
   }
 
@@ -499,7 +665,8 @@ function renderCart() {
     container.appendChild(card);
   });
 
-  document.getElementById("cartTotal").textContent = formatRupiah(total);
+  const cartTotalEl = document.getElementById("cartTotal");
+  if (cartTotalEl) cartTotalEl.textContent = formatRupiah(total);
 }
 
 const checkoutBtn = document.getElementById("checkoutBtn");
@@ -520,7 +687,7 @@ if (checkoutBtn) {
       <div class="text-center space-y-2">
         <p class="text-xs text-gray-500">Silakan scan kode QRIS di bawah ini:</p>
         <div class="flex justify-center my-2">
-          <img src="QRIS.png" alt="QRIS" class="w-48 h-48 object-contain rounded-lg border border-gray-200 shadow-sm p-1.5 bg-white" onerror="this.onerror=null; this.src='qris.png';" />
+          <img src="/QRIS.png" alt="QRIS" class="w-48 h-48 object-contain rounded-lg border border-gray-200 shadow-sm p-1.5 bg-white" onerror="this.onerror=null; this.src='/qris.png';" />
         </div>
         <div class="text-xs text-gray-500">Total Pembayaran:</div>
         <div class="text-lg font-bold text-blue-900">${formatRupiah(total)}</div>

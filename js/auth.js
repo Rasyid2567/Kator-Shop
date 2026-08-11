@@ -19,7 +19,11 @@ async function handleLogin(e) {
   }
 
   setSession({ username: found.username, role: found.role || "customer" });
-  window.location.href = "/";
+  if (found.role === "admin") {
+    window.location.href = "/admin";
+  } else {
+    window.location.href = "/";
+  }
 }
 
 async function handleRegister(e) {

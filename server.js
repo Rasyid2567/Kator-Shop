@@ -22,11 +22,14 @@ app.use((req, res, next) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
 app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "auth", "login", "index.html"));
+  res.sendFile(path.join(__dirname, "login.html"));
 });
 app.get("/register", (req, res) => {
-  res.sendFile(path.join(__dirname, "auth", "register", "index.html"));
+  res.sendFile(path.join(__dirname, "register.html"));
 });
 
 app.use(express.static(__dirname));
