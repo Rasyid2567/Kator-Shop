@@ -305,6 +305,8 @@ if (isAdmin) {
       e.preventDefault();
       const editOldUsername = document.getElementById("accEditId") ? document.getElementById("accEditId").value : "";
       const username = document.getElementById("accUsername").value.trim();
+      const email = document.getElementById("accEmail") ? document.getElementById("accEmail").value.trim() : "";
+      const nohp = document.getElementById("accNoHp") ? document.getElementById("accNoHp").value.trim() : "";
       const password = document.getElementById("accPassword").value;
       const role = document.getElementById("accRole").value;
 
@@ -313,15 +315,15 @@ if (isAdmin) {
       if (editOldUsername) {
         const idx = accountsList.findIndex((a) => a.username === editOldUsername);
         if (idx !== -1) {
-          accountsList[idx] = { username, password, role };
+          accountsList[idx] = { ...accountsList[idx], username, email, nohp, password, role };
           popupAlert(`Akun "${username}" berhasil diperbarui!`, "success", "Berhasil");
         }
       } else {
-        if (accountsList.some((a) => a.username === username)) {
+        if (accountsList.some((a) => a.username.toLowerCase() === username.toLowerCase())) {
           popupAlert(`Username "${username}" sudah digunakan.`, "warning", "Peringatan");
           return;
         }
-        accountsList.push({ username, password, role });
+        accountsList.push({ username, email, nohp, password, role });
         popupAlert(`Akun "${username}" berhasil ditambahkan!`, "success", "Berhasil");
       }
 
@@ -339,6 +341,8 @@ if (isAdmin) {
     if (form) form.reset();
     const accEditId = document.getElementById("accEditId");
     if (accEditId) accEditId.value = "";
+    if (document.getElementById("accEmail")) document.getElementById("accEmail").value = "";
+    if (document.getElementById("accNoHp")) document.getElementById("accNoHp").value = "";
   }
 
   function editAccount(username) {
@@ -346,6 +350,8 @@ if (isAdmin) {
     if (!acc) return;
     if (document.getElementById("accEditId")) document.getElementById("accEditId").value = acc.username;
     if (document.getElementById("accUsername")) document.getElementById("accUsername").value = acc.username;
+    if (document.getElementById("accEmail")) document.getElementById("accEmail").value = acc.email || "";
+    if (document.getElementById("accNoHp")) document.getElementById("accNoHp").value = acc.nohp || "";
     if (document.getElementById("accPassword")) document.getElementById("accPassword").value = acc.password;
     if (document.getElementById("accRole")) document.getElementById("accRole").value = acc.role || "customer";
 
@@ -414,11 +420,16 @@ function renderAccounts() {
       ? `<span class="bg-blue-900 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ml-2">Admin</span>`
       : `<span class="bg-gray-200 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ml-2">Customer</span>`;
 
+    const emailText = acc.email ? `<div class="text-gray-500 text-xs mt-0.5">Email: <span class="text-gray-700 font-medium">${acc.email}</span></div>` : "";
+    const nohpText = acc.nohp ? `<div class="text-gray-500 text-xs mt-0.5">No. HP: <span class="text-gray-700 font-medium">${acc.nohp}</span></div>` : "";
+
     card.innerHTML = `
       <div>
         <div class="font-semibold text-gray-800 text-sm flex items-center">
           ${acc.username} ${roleBadge}
         </div>
+        ${emailText}
+        ${nohpText}
         <div class="text-gray-500 text-xs mt-0.5">Password: <span class="font-mono text-gray-700">${acc.password}</span></div>
       </div>
       <div class="flex gap-2">

@@ -1,17 +1,16 @@
 [
   {
     "username": "admin",
+    "email": "admin@kastorshop.com",
+    "nohp": "081234567890",
     "password": "admin123",
     "role": "admin"
   },
   {
     "username": "user",
+    "email": "user@gmail.com",
+    "nohp": "081298765432",
     "password": "user123",
-    "role": "customer"
-  },
-  {
-    "username": "syidxmc",
-    "password": "2567",
     "role": "customer"
   }
 ]

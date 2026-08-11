@@ -2,23 +2,32 @@ const ACCOUNTS_JSON_PATH = "data/accounts.json";
 
 async function handleLogin(e) {
   e.preventDefault();
-  const username = document.getElementById("username").value.trim();
+  const inputVal = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
   const errorBox = document.getElementById("errorBox");
   errorBox.style.display = "none";
 
   const accounts = await loadStore(STORE.ACCOUNTS, ACCOUNTS_JSON_PATH);
   const found = accounts.find(
-    (a) => a.username === username && a.password === password
+    (a) =>
+      (a.username === inputVal ||
+        (a.email && a.email.toLowerCase() === inputVal.toLowerCase()) ||
+        (a.nohp && a.nohp === inputVal)) &&
+      a.password === password
   );
 
   if (!found) {
-    errorBox.textContent = "Username atau password salah.";
+    errorBox.textContent = "Username, email, no. HP, atau password salah.";
     errorBox.style.display = "block";
     return;
   }
 
-  setSession({ username: found.username, role: found.role || "customer" });
+  setSession({
+    username: found.username,
+    email: found.email || "",
+    nohp: found.nohp || "",
+    role: found.role || "customer",
+  });
   if (found.role === "admin") {
     window.location.href = "/admin";
   } else {
@@ -29,6 +38,8 @@ async function handleLogin(e) {
 async function handleRegister(e) {
   e.preventDefault();
   const username = document.getElementById("username").value.trim();
+  const email = document.getElementById("email") ? document.getElementById("email").value.trim() : "";
+  const nohp = document.getElementById("nohp") ? document.getElementById("nohp").value.trim() : "";
   const password = document.getElementById("password").value;
   const confirm = document.getElementById("confirmPassword").value;
   const errorBox = document.getElementById("errorBox");
@@ -36,11 +47,12 @@ async function handleRegister(e) {
   errorBox.style.display = "none";
   successBox.style.display = "none";
 
-  if (!username || !password) {
-    errorBox.textContent = "Username dan password wajib diisi.";
+  if (!username || !email || !nohp || !password) {
+    errorBox.textContent = "Semua bidang wajib diisi.";
     errorBox.style.display = "block";
     return;
   }
+
   if (password !== confirm) {
     errorBox.textContent = "Konfirmasi password tidak cocok.";
     errorBox.style.display = "block";
@@ -48,15 +60,30 @@ async function handleRegister(e) {
   }
 
   const accounts = await loadStore(STORE.ACCOUNTS, ACCOUNTS_JSON_PATH);
-  if (accounts.some((a) => a.username === username)) {
+  if (accounts.some((a) => a.username.toLowerCase() === username.toLowerCase())) {
     errorBox.textContent = "Username sudah dipakai, coba yang lain.";
     errorBox.style.display = "block";
     return;
   }
 
-  accounts.push({ username, password, role: "customer" });
+  if (accounts.some((a) => a.email && a.email.toLowerCase() === email.toLowerCase())) {
+    errorBox.textContent = "Email sudah terdaftar, silakan gunakan email lain atau login.";
+    errorBox.style.display = "block";
+    return;
+  }
+
+  if (accounts.some((a) => a.nohp && a.nohp === nohp)) {
+    errorBox.textContent = "Nomor HP sudah terdaftar, silakan gunakan nomor lain.";
+    errorBox.style.display = "block";
+    return;
+  }
+
+  accounts.push({ username, email, nohp, password, role: "customer" });
   saveStore(STORE.ACCOUNTS, accounts);
-  
+
+  successBox.textContent = "Pendaftaran berhasil! Mengalihkan ke halaman login...";
+  successBox.style.display = "block";
+
   setTimeout(() => {
     window.location.href = "/login";
   }, 1200);
