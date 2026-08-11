@@ -18,12 +18,25 @@ app.use((req, res, next) => {
   next();
 });
 
-// Clean URL routes (tanpa index.html di address bar)
+// Middleware untuk menghilangkan trailing slash di URL (misal /dashboard/ -> /dashboard)
+app.use((req, res, next) => {
+  if (req.path.length > 1 && req.path.endsWith("/")) {
+    const newPath = req.path.slice(0, -1);
+    const query = req.url.slice(req.path.length);
+    return res.redirect(301, newPath + query);
+  }
+  next();
+});
+
+// Clean URL routes (tanpa .html dan tanpa trailing slash di address bar)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(__dirname, "dashboard.html"));
+});
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin.html"));
+  res.sendFile(path.join(__dirname, "dashboard.html"));
 });
 app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "login.html"));

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kastor Shop - Admin</title>
+  <title>Kastor Shop - Dashboard</title>
   <link rel="shortcut icon" href="logo.png" type="image/x-icon">
   <script src="http://cdn.tailwindcss.com"></script>
   <style>
@@ -64,24 +64,29 @@
         <span>Kastor Shop</span>
       </div>
 
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="dashboard">DASHBOARD</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="products">PRODUCTS</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="kategori">KATEGORI</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="transaksi">TRANSAKSI</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="laporan">LAPORAN</nav-admin>
-      <nav-admin
-        class="nav-item admin-only block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50"
-        data-section="accounts">ACCOUNTS</nav-admin>
+      <a href="/"
+        class="block text-center bg-blue-900 text-white py-2 px-2 mb-4 rounded-full text-[13px] tracking-wide font-semibold hover:bg-blue-950 transition-colors shadow">
+        &larr; HALAMAN UTAMA
+      </a>
+
+      <div
+        class="nav-item admin-only w-full block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50 transition-colors"
+        data-section="dashboard">DASHBOARD</div>
+      <div
+        class="nav-item admin-only w-full block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50 transition-colors"
+        data-section="products">PRODUCTS</div>
+      <div
+        class="nav-item admin-only w-full block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50 transition-colors"
+        data-section="kategori">KATEGORI</div>
+      <div
+        class="nav-item admin-only w-full block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50 transition-colors"
+        data-section="transaksi">TRANSAKSI</div>
+      <div
+        class="nav-item admin-only w-full block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50 transition-colors"
+        data-section="laporan">LAPORAN</div>
+      <div
+        class="nav-item admin-only w-full block text-center bg-white border border-blue-900 text-gray-800 py-2.5 px-2 mb-2.5 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-blue-50 transition-colors"
+        data-section="accounts">ACCOUNTS</div>
 
       <div id="logoutBtn"
         class="block text-center bg-white border border-red-700 text-red-700 py-2.5 px-2 mt-7 rounded-full text-[13px] tracking-wide cursor-pointer select-none hover:bg-red-50">
@@ -91,10 +96,13 @@
 
     <div class="flex-1 p-4 md:p-6 min-w-0">
       <div class="flex justify-between items-center mb-2.5">
-        <div class="text-xs text-gray-600">
-          Selamat Datang <b id="currentUser"></b>
-          <span id="currentRole"
-            class="admin-only inline-block text-[11px] py-0.5 px-2 rounded-full bg-blue-900 text-white ml-1.5 uppercase"></span>
+        <div class="flex items-center gap-2.5 text-xs text-gray-600">
+          <img id="userAvatarHeader" src="https://placehold.co/40x40?text=A" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-blue-200 shadow-sm" onerror="this.src='https://placehold.co/40x40?text=A'" />
+          <div>
+            Selamat Datang <b id="currentUser"></b>
+            <span id="currentRole"
+              class="admin-only inline-block text-[11px] py-0.5 px-2 rounded-full bg-blue-900 text-white ml-1.5 uppercase"></span>
+          </div>
         </div>
       </div>
 

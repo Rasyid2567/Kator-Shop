@@ -17,22 +17,50 @@ function formatRupiah(num) {
 }
 
 session = getSession();
-if (!session) {
+
+const isAdmin = session && session.role === "admin";
+const isPathDashboard =
+  window.location.pathname.startsWith("/dashboard") ||
+  window.location.pathname.startsWith("/admin") ||
+  window.location.pathname.includes("dashboard.html") ||
+  window.location.pathname.includes("admin.html");
+
+// Dynamic Route Guard
+if (isPathDashboard && !isAdmin) {
   window.location.href = "/login";
 }
 
-const isAdmin = session && session.role === "admin";
-const isPathAdmin = window.location.pathname.startsWith("/admin") || window.location.pathname.includes("admin.html");
-
-// Dynamic Route Guard
-if (isPathAdmin && !isAdmin) {
-  window.location.href = "/";
-} else if (!isPathAdmin && isAdmin) {
-  window.location.href = "/admin";
-}
-
 const currentUserEl = document.getElementById("currentUser");
-if (currentUserEl) currentUserEl.textContent = session ? session.username : "";
+const welcomePrefixEl = document.getElementById("welcomePrefix");
+const headerLoginBtn = document.getElementById("headerLoginBtn");
+const headerRegisterBtn = document.getElementById("headerRegisterBtn");
+const logoutBtnEl = document.getElementById("logoutBtn");
+const adminDashboardBtn = document.getElementById("adminDashboardBtn");
+const profilNavBtn = document.getElementById("profilNavBtn");
+
+if (session) {
+  if (currentUserEl) currentUserEl.textContent = session.username;
+  if (welcomePrefixEl) welcomePrefixEl.textContent = "Selamat Datang,";
+  if (headerLoginBtn) headerLoginBtn.classList.add("hidden");
+  if (headerRegisterBtn) headerRegisterBtn.classList.add("hidden");
+  if (logoutBtnEl) logoutBtnEl.classList.remove("hidden");
+  if (profilNavBtn) profilNavBtn.classList.remove("hidden");
+  if (adminDashboardBtn) {
+    if (isAdmin) {
+      adminDashboardBtn.classList.remove("hidden");
+    } else {
+      adminDashboardBtn.classList.add("hidden");
+    }
+  }
+} else {
+  if (currentUserEl) currentUserEl.textContent = "Tamu";
+  if (welcomePrefixEl) welcomePrefixEl.textContent = "Selamat Datang,";
+  if (headerLoginBtn) headerLoginBtn.classList.remove("hidden");
+  if (headerRegisterBtn) headerRegisterBtn.classList.remove("hidden");
+  if (logoutBtnEl) logoutBtnEl.classList.add("hidden");
+  if (profilNavBtn) profilNavBtn.classList.add("hidden");
+  if (adminDashboardBtn) adminDashboardBtn.classList.add("hidden");
+}
 
 const currentRoleEl = document.getElementById("currentRole");
 if (currentRoleEl) currentRoleEl.textContent = session ? session.role : "";
@@ -48,29 +76,35 @@ if (defaultNav) {
   if (targetSec) targetSec.classList.remove("hidden");
 }
 
-const logoutBtnEl = document.getElementById("logoutBtn");
-if (logoutBtnEl) {
-  logoutBtnEl.addEventListener("click", () => {
-    clearSession();
-    window.location.href = "/login";
-  });
+function handleLogout() {
+  clearSession();
+  window.location.href = "/";
 }
+
+if (logoutBtnEl) logoutBtnEl.addEventListener("click", handleLogout);
 
 document.querySelectorAll(".nav-item[data-section]").forEach((item) => {
   item.addEventListener("click", () => {
+    const section = item.dataset.section;
+    if ((section === "riwayat" || section === "profil") && !session) {
+      popupLoginPrompt(`Silakan masuk atau mendaftar akun terlebih dahulu untuk melihat ${section === "profil" ? "profil" : "riwayat transaksi"}.`);
+      return;
+    }
+
     document.querySelectorAll(".nav-item").forEach((i) => i.classList.remove(...NAV_ACTIVE_CLASSES));
     item.classList.add(...NAV_ACTIVE_CLASSES);
 
     document.querySelectorAll("section[id^='section-']").forEach((s) => s.classList.add("hidden"));
-    const sec = document.getElementById("section-" + item.dataset.section);
+    const sec = document.getElementById("section-" + section);
     if (sec) sec.classList.remove("hidden");
 
-    if (item.dataset.section === "dashboard" && typeof renderDashboard === "function") renderDashboard();
-    if (item.dataset.section === "laporan" && typeof renderLaporan === "function") renderLaporan();
-    if (item.dataset.section === "accounts" && typeof renderAccounts === "function") renderAccounts();
-    if (item.dataset.section === "belanja" && typeof renderProductGrid === "function") renderProductGrid();
-    if (item.dataset.section === "keranjang" && typeof renderCart === "function") renderCart();
-    if (item.dataset.section === "riwayat" && typeof renderRiwayat === "function") renderRiwayat();
+    if (section === "dashboard" && typeof renderDashboard === "function") renderDashboard();
+    if (section === "laporan" && typeof renderLaporan === "function") renderLaporan();
+    if (section === "accounts" && typeof renderAccounts === "function") renderAccounts();
+    if (section === "belanja" && typeof renderProductGrid === "function") renderProductGrid();
+    if (section === "keranjang" && typeof renderCart === "function") renderCart();
+    if (section === "riwayat" && typeof renderRiwayat === "function") renderRiwayat();
+    if (section === "profil" && typeof renderProfil === "function") renderProfil();
   });
 });
 
@@ -81,7 +115,21 @@ async function init() {
   accountsList = await loadStore(STORE.ACCOUNTS, ACCOUNTS_JSON_PATH);
   cart = JSON.parse(localStorage.getItem(STORE.CART) || "[]");
 
-  if (isAdmin) {
+  if (session) {
+    const userAvatarHeaderEl = document.getElementById("userAvatarHeader");
+    if (userAvatarHeaderEl) {
+      const currentAcc = accountsList.find((a) => a.username === session.username);
+      const avatarUrl = (currentAcc && currentAcc.avatar) || session.avatar || "";
+      if (avatarUrl) {
+        userAvatarHeaderEl.src = avatarUrl;
+      } else {
+        const initial = session.username ? session.username.charAt(0).toUpperCase() : "U";
+        userAvatarHeaderEl.src = `https://placehold.co/40x40?text=${initial}`;
+      }
+    }
+  }
+
+  if (isPathDashboard) {
     renderDashboard();
     renderProducts();
     renderKategoriSelect();
@@ -93,6 +141,7 @@ async function init() {
     renderProductGrid();
     renderCart();
     renderRiwayat();
+    renderProfil();
     updateCartBadge();
   }
 }
@@ -422,15 +471,19 @@ function renderAccounts() {
 
     const emailText = acc.email ? `<div class="text-gray-500 text-xs mt-0.5">Email: <span class="text-gray-700 font-medium">${acc.email}</span></div>` : "";
     const nohpText = acc.nohp ? `<div class="text-gray-500 text-xs mt-0.5">No. HP: <span class="text-gray-700 font-medium">${acc.nohp}</span></div>` : "";
+    const avatarSrc = acc.avatar || `https://placehold.co/40x40?text=${acc.username.charAt(0).toUpperCase()}`;
 
     card.innerHTML = `
-      <div>
-        <div class="font-semibold text-gray-800 text-sm flex items-center">
-          ${acc.username} ${roleBadge}
+      <div class="flex items-center gap-3">
+        <img src="${avatarSrc}" class="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0" onerror="this.src='https://placehold.co/40x40?text=U'" />
+        <div>
+          <div class="font-semibold text-gray-800 text-sm flex items-center">
+            ${acc.username} ${roleBadge}
+          </div>
+          ${emailText}
+          ${nohpText}
+          <div class="text-gray-500 text-xs mt-0.5">Password: <span class="font-mono text-gray-700">${acc.password}</span></div>
         </div>
-        ${emailText}
-        ${nohpText}
-        <div class="text-gray-500 text-xs mt-0.5">Password: <span class="font-mono text-gray-700">${acc.password}</span></div>
       </div>
       <div class="flex gap-2">
         <button onclick="editAccount('${acc.username}')" class="px-3.5 py-1.5 bg-gray-500 text-white rounded text-xs cursor-pointer hover:bg-gray-600">Edit</button>
@@ -756,6 +809,11 @@ function renderCart() {
 const checkoutBtn = document.getElementById("checkoutBtn");
 if (checkoutBtn) {
   checkoutBtn.addEventListener("click", async () => {
+    if (!session) {
+      popupLoginPrompt("Silakan masuk atau mendaftar akun terlebih dahulu untuk melakukan transaksi checkout.");
+      return;
+    }
+
     if (cart.length === 0) {
       popupAlert("Keranjang masih kosong.", "warning", "Keranjang Kosong");
       return;
@@ -848,4 +906,165 @@ function renderRiwayat() {
       `;
       container.appendChild(card);
     });
+}
+
+function renderProfil() {
+  if (!session) return;
+  const usernameInput = document.getElementById("profileUsername");
+  const emailInput = document.getElementById("profileEmail");
+  const nohpInput = document.getElementById("profileNoHp");
+  const avatarPreview = document.getElementById("profileAvatarPreview");
+  const avatarHidden = document.getElementById("profileAvatarHidden");
+  const avatarUrlInput = document.getElementById("profileAvatarUrl");
+
+  if (!usernameInput || !emailInput || !nohpInput) return;
+
+  const currentAcc = accountsList.find((a) => a.username === session.username);
+  const avatar = (currentAcc && currentAcc.avatar) || session.avatar || "";
+
+  usernameInput.value = session.username || "";
+  emailInput.value = (currentAcc && currentAcc.email) || session.email || "";
+  nohpInput.value = (currentAcc && currentAcc.nohp) || session.nohp || "";
+  if (avatarHidden) avatarHidden.value = avatar;
+  if (avatarUrlInput) avatarUrlInput.value = avatar.startsWith("http") ? avatar : "";
+
+  if (avatarPreview) {
+    if (avatar) {
+      avatarPreview.src = avatar;
+    } else {
+      const initial = session.username ? session.username.charAt(0).toUpperCase() : "U";
+      avatarPreview.src = `https://placehold.co/100x100?text=${initial}`;
+    }
+  }
+}
+
+// Avatar Source Toggle & Event Listeners
+const avatarSourceUpload = document.getElementById("avatarSourceUpload");
+const avatarSourceLink = document.getElementById("avatarSourceLink");
+const avatarUploadContainer = document.getElementById("avatarUploadContainer");
+const avatarLinkContainer = document.getElementById("avatarLinkContainer");
+const profileAvatarFile = document.getElementById("profileAvatarFile");
+const profileAvatarUrl = document.getElementById("profileAvatarUrl");
+const profileAvatarHidden = document.getElementById("profileAvatarHidden");
+const profileAvatarPreview = document.getElementById("profileAvatarPreview");
+
+if (avatarSourceUpload && avatarSourceLink) {
+  avatarSourceUpload.addEventListener("change", () => {
+    if (avatarUploadContainer) avatarUploadContainer.classList.remove("hidden");
+    if (avatarLinkContainer) avatarLinkContainer.classList.add("hidden");
+  });
+  avatarSourceLink.addEventListener("change", () => {
+    if (avatarUploadContainer) avatarUploadContainer.classList.add("hidden");
+    if (avatarLinkContainer) avatarLinkContainer.classList.remove("hidden");
+  });
+}
+
+if (profileAvatarFile) {
+  profileAvatarFile.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        popupAlert("Ukuran foto terlalu besar (maksimal 5MB).", "warning", "Ukuran Melebihi Batas");
+        profileAvatarFile.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const base64Str = evt.target.result;
+        if (profileAvatarHidden) profileAvatarHidden.value = base64Str;
+        if (profileAvatarPreview) profileAvatarPreview.src = base64Str;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+if (profileAvatarUrl) {
+  profileAvatarUrl.addEventListener("input", (e) => {
+    const url = e.target.value.trim();
+    if (url) {
+      if (profileAvatarHidden) profileAvatarHidden.value = url;
+      if (profileAvatarPreview) profileAvatarPreview.src = url;
+    }
+  });
+}
+
+// Profile Form Submit (Update Email, No HP & Avatar)
+const profileFormEl = document.getElementById("profileForm");
+if (profileFormEl) {
+  profileFormEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!session) return;
+
+    const email = document.getElementById("profileEmail").value.trim();
+    const nohp = document.getElementById("profileNoHp").value.trim();
+    const avatar = profileAvatarHidden ? profileAvatarHidden.value.trim() : "";
+
+    if (!email || !nohp) {
+      popupAlert("Email dan Nomor HP wajib diisi.", "warning", "Peringatan");
+      return;
+    }
+
+    if (accountsList.some((a) => a.username !== session.username && a.email && a.email.toLowerCase() === email.toLowerCase())) {
+      popupAlert("Email sudah digunakan oleh akun lain.", "warning", "Gagal Diperbarui");
+      return;
+    }
+
+    if (accountsList.some((a) => a.username !== session.username && a.nohp && a.nohp === nohp)) {
+      popupAlert("Nomor HP sudah digunakan oleh akun lain.", "warning", "Gagal Diperbarui");
+      return;
+    }
+
+    const idx = accountsList.findIndex((a) => a.username === session.username);
+    if (idx !== -1) {
+      accountsList[idx].email = email;
+      accountsList[idx].nohp = nohp;
+      accountsList[idx].avatar = avatar;
+      saveStore(STORE.ACCOUNTS, accountsList);
+
+      session.email = email;
+      session.nohp = nohp;
+      session.avatar = avatar;
+      setSession(session);
+
+      const userAvatarHeaderEl = document.getElementById("userAvatarHeader");
+      if (userAvatarHeaderEl) {
+        userAvatarHeaderEl.src = avatar || `https://placehold.co/40x40?text=${session.username.charAt(0).toUpperCase()}`;
+      }
+
+      popupAlert("Profil Anda berhasil diperbarui!", "success", "Berhasil");
+    }
+  });
+}
+
+// Change Password Form Submit
+const changePasswordFormEl = document.getElementById("changePasswordForm");
+if (changePasswordFormEl) {
+  changePasswordFormEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!session) return;
+
+    const oldPass = document.getElementById("oldPassword").value;
+    const newPass = document.getElementById("newPassword").value;
+    const confirmNewPass = document.getElementById("confirmNewPassword").value;
+
+    const idx = accountsList.findIndex((a) => a.username === session.username);
+    if (idx === -1) return;
+
+    if (accountsList[idx].password !== oldPass) {
+      popupAlert("Password saat ini tidak sesuai.", "warning", "Gagal Ubah Password");
+      return;
+    }
+
+    if (newPass !== confirmNewPass) {
+      popupAlert("Konfirmasi password baru tidak cocok.", "warning", "Gagal Ubah Password");
+      return;
+    }
+
+    accountsList[idx].password = newPass;
+    saveStore(STORE.ACCOUNTS, accountsList);
+
+    document.getElementById("changePasswordForm").reset();
+    popupAlert("Password Anda berhasil diperbarui!", "success", "Berhasil Ubah Password");
+  });
 }

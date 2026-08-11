@@ -127,3 +127,19 @@ function popupAlert(message, type = "info", title) {
 function popupConfirm(message, title) {
   return showPopup({ type: "confirm", title, message });
 }
+
+function popupLoginPrompt(message = "Silakan masuk ke akun Anda terlebih dahulu.") {
+  return showPopup({
+    type: "info",
+    title: "Diperlukan Akun",
+    message,
+    confirmText: "Masuk (Login)",
+    cancelText: "Daftar Akun",
+  }).then((choice) => {
+    if (choice) {
+      window.location.href = "/login";
+    } else {
+      window.location.href = "/register";
+    }
+  });
+}

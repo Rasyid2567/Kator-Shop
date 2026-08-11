@@ -28,11 +28,7 @@ async function handleLogin(e) {
     nohp: found.nohp || "",
     role: found.role || "customer",
   });
-  if (found.role === "admin") {
-    window.location.href = "/admin";
-  } else {
-    window.location.href = "/";
-  }
+  window.location.href = "/";
 }
 
 async function handleRegister(e) {
