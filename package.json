@@ -1,12 +1,14 @@
 {
-  "name": "toko-app",
+  "name": "kastor-shop",
   "version": "1.0.0",
-  "description": "Toko App dengan Node.js Backend untuk simpan otomatis ke file JSON",
+  "description": "Aplikasi Kasir Kastor Shop dengan Backend Node.js dan Database PostgreSQL",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "pg": "^8.23.0"
   }
-} 
+}

@@ -1,6 +1,7 @@
+require("dotenv").config();
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
+const db = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 2567;
@@ -49,50 +50,54 @@ app.use(express.static(__dirname));
 
 const ALLOWED_ENTITIES = ["products", "kategori", "transaksi", "accounts"];
 
-// Endpoint GET untuk membaca file JSON dari data/
-app.get("/api/:entity", (req, res) => {
+// Endpoint GET untuk membaca data dari Database PostgreSQL
+app.get("/api/:entity", async (req, res) => {
   const { entity } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) {
     return res.status(400).json({ error: "Entity tidak valid" });
   }
 
-  const filePath = path.join(__dirname, "data", `${entity}.json`);
-  if (!fs.existsSync(filePath)) {
-    return res.json([]);
-  }
-
   try {
-    const rawData = fs.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(rawData || "[]");
+    const data = await db.getEntities(entity);
     return res.json(data);
   } catch (err) {
-    console.error(`Error reading ${entity}.json:`, err);
-    return res.status(500).json({ error: "Gagal membaca file JSON" });
+    console.error(`Error reading ${entity} from database:`, err);
+    return res.status(500).json({ error: `Gagal membaca data ${entity} dari database` });
   }
 });
 
-// Endpoint POST untuk menyimpan data langsung ke file JSON di data/
-app.post("/api/:entity", (req, res) => {
+// Endpoint POST untuk menyimpan/sinkronisasi data ke Database PostgreSQL
+app.post("/api/:entity", async (req, res) => {
   const { entity } = req.params;
   if (!ALLOWED_ENTITIES.includes(entity)) {
     return res.status(400).json({ error: "Entity tidak valid" });
   }
 
-  const filePath = path.join(__dirname, "data", `${entity}.json`);
   try {
-    const jsonContent = JSON.stringify(req.body, null, 2);
-    fs.writeFileSync(filePath, jsonContent, "utf-8");
-    console.log(`[SERVER] ${entity}.json berhasil diperbarui! (${req.body.length || 0} items)`);
-    return res.json({ success: true, message: `File ${entity}.json berhasil disimpan.` });
+    const result = await db.saveEntities(entity, req.body);
+    console.log(`[SERVER] Database '${entity}' berhasil diperbarui! (${Array.isArray(req.body) ? req.body.length : 1} items)`);
+    return res.json({ success: true, message: `Data ${entity} berhasil disimpan ke database PostgreSQL.` });
   } catch (err) {
-    console.error(`Error writing to ${entity}.json:`, err);
-    return res.status(500).json({ error: "Gagal menyimpan ke file JSON" });
+    console.error(`Error writing ${entity} to database:`, err);
+    return res.status(500).json({ error: `Gagal menyimpan data ${entity} ke database` });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`================================================`);
-  console.log(`Toko telah dibuka ✅️`);
-  console.log(`Buka di Browser http://localhost:${PORT}`);
-  console.log(`================================================`);
-});
+// Inisialisasi Database dan Jalankan Server
+async function startServer() {
+  try {
+    await db.initDb();
+    app.listen(PORT, () => {
+      console.log(`================================================`);
+      console.log(`Kastor Shop telah dibuka ✅️`);
+      console.log(`Penyimpanan: PostgreSQL Database (${process.env.PGDATABASE || "kastorshop"})`);
+      console.log(`Buka di Browser: http://localhost:${PORT}`);
+      console.log(`================================================`);
+    });
+  } catch (err) {
+    console.error("[FATAL] Gagal menghubungkan ke Database PostgreSQL:", err.message);
+    process.exit(1);
+  }
+}
+
+startServer();
